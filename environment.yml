@@ -1,0 +1,7 @@
+name: dynhebb
+dependencies:
+  - python>=3.7.6
+  - numpy
+  - matplotlib
+  - pytorch
+  - torchvision
