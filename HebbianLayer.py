@@ -1,9 +1,6 @@
-import math
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn import init
 from torch.nn.parameter import Parameter
 
 class HebbianLayer(nn.Module):
@@ -17,16 +14,8 @@ class HebbianLayer(nn.Module):
         self.learning_rate = learning_rate
         self.learning = True
 
-        self.reset_parameters()
-
     def activation(self, input):
         return F.linear(input, self.weight, self.bias)
-
-    def reset_parameters(self):
-        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-        fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
-        bound = 1 / math.sqrt(fan_in)
-        init.uniform_(self.bias, -bound, bound)
 
     def forward(self, input):
         y = self.activation(input)
