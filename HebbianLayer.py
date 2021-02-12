@@ -1,15 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.parameter import Parameter
 
 class HebbianLayer(nn.Module):
     def __init__(self, in_features, out_features, learning_rate):
         super(HebbianLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.weight = Parameter(torch.Tensor(out_features, in_features))
-        self.bias = Parameter(torch.Tensor(out_features))
+        self.weight = torch.Tensor(out_features, in_features)
+        self.bias = torch.Tensor(out_features)
 
         self.learning_rate = learning_rate
         self.learning = True

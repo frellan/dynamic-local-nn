@@ -7,13 +7,15 @@ class Encoder(nn.Module):
         super().__init__()
         self.learning_rate = learning_rate
         self.hidden_layer = HebbianLayer(784, 128, learning_rate)
-        # self.output_layer = HebbianLayer(128, 128, learning_rate)
         self.output_layer = nn.Linear(128, 128)
+        self.training = True
 
     def forward(self, features):
         y = self.hidden_layer(features)
-        # y = F.relu(y)
         code = self.output_layer(y)
         return code
-        # output = F.relu(code)
-        # return output
+
+    def toggle_training(self, training):
+        self.training = training
+        self.hidden_layer.training = self.training
+

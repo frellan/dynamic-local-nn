@@ -35,73 +35,67 @@ auto_encoder = AutoEncoder().to(device)
 optimizer = optim.Adam(auto_encoder.parameters(), lr=1e-3)
 loss_fn = nn.MSELoss()
 
-encoder.training = True
-for epoch in range(20):
+encoder.toggle_training(True)
+for epoch in range(1):
+    batch = 1
+    for batch_features, _ in train_loader:
+        # reshape mini-batch data to [N, 784] matrix
+        # load it to the active device
+        batch_features = batch_features.view(-1, 784).to(device)
+        encoder(batch_features)
+        print("encoded batch : {}/{}".format(batch, len(train_loader)))
+        batch += 1
+encoder.toggle_training(False)
+
+epochs = 1
+for epoch in range(epochs):
     loss = 0
     for batch_features, _ in train_loader:
         # reshape mini-batch data to [N, 784] matrix
         # load it to the active device
         batch_features = batch_features.view(-1, 784).to(device)
+        # reset the gradients back to zero
+        # PyTorch accumulates gradients on subsequent backward passes
+        optimizer.zero_grad()
+        # get code from encoder
+        code = encoder(batch_features)
         # compute reconstructions
-        outputs = encoder(batch_features)
+        outputs = decoder(code)
         # compute training reconstruction loss
-        # train_loss = loss_fn(outputs, batch_features)
+        train_loss = loss_fn(outputs, batch_features)
+        # compute accumulated gradients
+        train_loss.backward()
+        # perform parameter update based on current gradients
+        optimizer.step()
         # add the mini-batch training loss to epoch loss
-        # loss += train_loss.item()
-        print(outputs)
+        loss += train_loss.item()
+
     # compute the epoch training loss
     loss = loss / len(train_loader)
     # display the epoch training loss
-    print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, 20, loss))
-encoder.training = False
+    print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
 
-# epochs = 20
+with torch.no_grad():
+    number = 10
+    plt.figure(figsize=(20, 4))
+    for index in range(number):
+        # display original
+        ax = plt.subplot(2, number, index + 1)
+        plt.imshow(test_dataset.data[index].reshape(28, 28))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
 
-# for epoch in range(epochs):
-#     loss = 0
-#     for batch_features, _ in train_loader:
-#         # reshape mini-batch data to [N, 784] matrix
-#         # load it to the active device
-#         batch_features = batch_features.view(-1, 784).to(device)
-#         # reset the gradients back to zero
-#         # PyTorch accumulates gradients on subsequent backward passes
-#         optimizer.zero_grad()
-#         # compute reconstructions
-#         outputs = auto_encoder(batch_features)
-#         # compute training reconstruction loss
-#         train_loss = loss_fn(outputs, batch_features)
-#         # compute accumulated gradients
-#         train_loss.backward()
-#         # perform parameter update based on current gradients
-#         optimizer.step()
-#         # add the mini-batch training loss to epoch loss
-#         loss += train_loss.item()
-
-#     # compute the epoch training loss
-#     loss = loss / len(train_loader)
-#     # display the epoch training loss
-#     print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
-
-# with torch.no_grad():
-#     number = 10
-#     plt.figure(figsize=(20, 4))
-#     for index in range(number):
-#         # display original
-#         ax = plt.subplot(2, number, index + 1)
-#         plt.imshow(test_dataset.data[index].reshape(28, 28))
-#         plt.gray()
-#         ax.get_xaxis().set_visible(False)
-#         ax.get_yaxis().set_visible(False)
-
-#         # display reconstruction
-#         ax = plt.subplot(2, number, index + 1 + number)
-#         test_data = test_dataset.data[index]
-#         test_data = test_data.to(device)
-#         test_data = test_data.float()
-#         test_data = test_data.view(-1, 784)
-#         output = model(test_data)
-#         plt.imshow(output.cpu().reshape(28, 28))
-#         plt.gray()
-#         ax.get_xaxis().set_visible(False)
-#         ax.get_yaxis().set_visible(False)
-#     plt.show()
+        # display reconstruction
+        ax = plt.subplot(2, number, index + 1 + number)
+        test_data = test_dataset.data[index]
+        test_data = test_data.to(device)
+        test_data = test_data.float()
+        test_data = test_data.view(-1, 784)
+        output = encoder(test_data)
+        output = decoder(output)
+        plt.imshow(output.cpu().reshape(28, 28))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
