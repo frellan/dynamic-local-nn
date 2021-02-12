@@ -14,18 +14,7 @@ class HebbianLayer(nn.Module):
         self.learning = True
 
     def output(self, input):
-        print("X=")
-        print(input)
-        print("weight=")
-        print(self.weight)
-        print("bias=")
-        print(self.bias)
-        # return F.linear(input, self.weight, self.bias)
-        output = input.matmul(self.weight.t())
-        output += self.bias
-        print("x * w^T + b =")
-        print(output)
-        return output
+        return F.linear(input, self.weight, self.bias)
 
     def forward(self, input):
         y = self.output(input)
@@ -36,7 +25,7 @@ class HebbianLayer(nn.Module):
     def update_weight(self, input):
         count = 0
         for x_input in input:
-            if count >= 1:
+            if count > 1:
                 continue
             x = x_input.reshape(1, len(x_input))
             y = self.output(x_input)
@@ -44,8 +33,8 @@ class HebbianLayer(nn.Module):
             y = y.reshape(1, y_length)
             y_t = y.reshape(y_length, 1)
 
+            d_w = self.learning_rate * ((x * y_t) - (torch.tril(y * y_t) @ self.weight))
 
-            d_w = self.learning_rate * ((x * y_t) - (torch.tril(y * y_t, diagonal=-1) @ self.weight))
             self.weight += d_w
             count += 1
 

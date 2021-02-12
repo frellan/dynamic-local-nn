@@ -31,8 +31,7 @@ test_loader = torch.utils.data.DataLoader(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 encoder = Encoder().to(device)
 decoder = Decoder().to(device)
-# auto_encoder = AutoEncoder().to(device)
-# optimizer = optim.Adam(auto_encoder.parameters(), lr=1e-3)
+optimizer = optim.Adam(decoder.parameters(), lr=1e-3)
 loss_fn = nn.MSELoss()
 
 encoder.toggle_training(True)
@@ -44,7 +43,7 @@ for epoch in range(1):
         # reshape mini-batch data to [N, 784] matrix
         # load it to the active device
         batch_features = batch_features.view(-1, 784).to(device)
-        encoder(batch_features)
+        print(encoder(batch_features))
         print("encoded batch : {}/{}".format(batch, len(train_loader)))
         batch += 1
 encoder.toggle_training(False)
@@ -61,6 +60,7 @@ encoder.toggle_training(False)
 #         optimizer.zero_grad()
 #         # get code from encoder
 #         code = encoder(batch_features)
+#         print(code)
 #         # compute reconstructions
 #         outputs = decoder(code)
 #         # compute training reconstruction loss
