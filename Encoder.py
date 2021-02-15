@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Encoder(nn.Module):
-    def __init__(self, learning_rate=0.01):
+    def __init__(self, learning_rate=0.001):
         super().__init__()
         self.learning_rate = learning_rate
         self.hidden_layer = HebbianLayer(784, 128, learning_rate)
