@@ -18,4 +18,3 @@ class Encoder(nn.Module):
     def toggle_training(self, training):
         self.training = training
         self.hidden_layer.training = self.training
-

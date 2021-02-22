@@ -21,7 +21,7 @@ train_dataset = torchvision.datasets.MNIST(
     root="~/torch_datasets", train=True, transform=transform, download=True
 )
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=128, shuffle=True, num_workers=0, pin_memory=True
+    train_dataset, batch_size=1000, shuffle=True, num_workers=0, pin_memory=True
 )
 
 test_dataset = torchvision.datasets.MNIST(
@@ -41,19 +41,15 @@ encoder.toggle_training(True)
 for epoch in range(1):
     batch = 1
     for batch_features, _ in train_loader:
-        # if batch > 1:
-        #     continue
         # reshape mini-batch data to [N, 784] matrix
         # load it to the active device
         batch_features = batch_features.view(-1, 784).to(device)
         output = encoder(batch_features)
-        print("OUTPUT:", output)
-        print("OUTPUT SHAPE:", output.shape)
         print("encoded batch : {}/{}".format(batch, len(train_loader)))
         batch += 1
 encoder.toggle_training(False)
 
-epochs = 3
+epochs = 20
 for epoch in range(epochs):
     loss = 0
     for batch_features, _ in train_loader:
@@ -80,6 +76,8 @@ for epoch in range(epochs):
     loss = loss / len(train_loader)
     # display the epoch training loss
     print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
+
+encoder.hidden_layer.view = True
 
 with torch.no_grad():
     number = 10
