@@ -33,24 +33,30 @@ test_loader = torch.utils.data.DataLoader(
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 encoder = Encoder().to(device)
+encode_epochs = 50
+for layer in range(2):
+    if layer == 0:
+        encoder.hebb1.training = True
+        encoder.hebb2.training = False
+    elif layer == 1:
+        encoder.hebb1.training = False
+        encoder.hebb2.training = True
+    for epoch in range(encode_epochs):
+        batch = 1
+        for batch_features, _ in train_loader:
+            # reshape mini-batch data to [N, 784] matrix
+            # load it to the active device
+            batch_features = batch_features.view(-1, 784).to(device)
+            output = encoder(batch_features)
+            print("Epoch: {}/{}, Batch: {}/{}".format(epoch + 1, encode_epochs, batch, len(train_loader)))
+            batch += 1
+encoder.toggle_training(False)
+
 decoder = Decoder().to(device)
 optimizer = optim.Adam(decoder.parameters(), lr=1e-3)
 loss_fn = nn.MSELoss()
-
-encoder.toggle_training(True)
-for epoch in range(1):
-    batch = 1
-    for batch_features, _ in train_loader:
-        # reshape mini-batch data to [N, 784] matrix
-        # load it to the active device
-        batch_features = batch_features.view(-1, 784).to(device)
-        output = encoder(batch_features)
-        print("encoded batch : {}/{}".format(batch, len(train_loader)))
-        batch += 1
-encoder.toggle_training(False)
-
-epochs = 20
-for epoch in range(epochs):
+decode_epochs = 50
+for epoch in range(decode_epochs):
     loss = 0
     for batch_features, _ in train_loader:
         # reshape mini-batch data to [N, 784] matrix
@@ -60,7 +66,8 @@ for epoch in range(epochs):
         # PyTorch accumulates gradients on subsequent backward passes
         optimizer.zero_grad()
         # get code from encoder
-        code = encoder(batch_features)
+        with torch.no_grad():
+            code = encoder(batch_features)
         # compute reconstructions
         outputs = decoder(code)
         # compute training reconstruction loss
@@ -75,9 +82,7 @@ for epoch in range(epochs):
     # compute the epoch training loss
     loss = loss / len(train_loader)
     # display the epoch training loss
-    print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
-
-encoder.hidden_layer.view = True
+    print("Epoch: {}/{}, Loss = {:.6f}".format(epoch + 1, decode_epochs, loss))
 
 with torch.no_grad():
     number = 10

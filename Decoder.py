@@ -4,12 +4,10 @@ import torch.nn.functional as F
 class Decoder(nn.Module):
     def __init__(self):
         super().__init__()
-        self.hidden_layer = nn.Linear(128, 128)
-        self.output_layer = nn.Linear(128, 784)
+        self.lin1 = nn.Linear(128, 256)
+        self.lin2 = nn.Linear(256, 784)
 
-    def forward(self, features):
-        y = self.hidden_layer(features)
-        y = F.relu(y)
-        y = self.output_layer(y)
-        output = F.relu(y)
-        return output
+    def forward(self, x):
+        x = F.relu(self.lin1(x))
+        x = F.relu(self.lin2(x))
+        return x
