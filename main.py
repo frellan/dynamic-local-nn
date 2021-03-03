@@ -34,7 +34,7 @@ test_loader = torch.utils.data.DataLoader(
 device_string = "cuda" if torch.cuda.is_available() else "cpu"
 print("using " + device_string)
 device = torch.device(device_string)
-encoder = Encoder().to(device)
+encoder = Encoder(device).to(device)
 encode_epochs = 50
 for layer in range(2):
     if layer == 0:
