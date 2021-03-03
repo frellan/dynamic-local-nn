@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 
 class BioClassifier(nn.Module):
     # Wᵤᵢ is the unsupervised pretrained weight matrix of shape: (n_filters, img_sz)

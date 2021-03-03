@@ -10,3 +10,4 @@ dependencies:
   - matplotlib
   - pytorch>=1.6.0
   - torchvision
+  - ignite
