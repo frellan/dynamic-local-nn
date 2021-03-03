@@ -43,10 +43,10 @@ class SCANN(nn.Module):
             for mini_batch, _ in train_loader:
                 mini_batch = torch.transpose(mini_batch, 0, 1)
                 sign = torch.sign(self.weights)
-                W = sign * torch.abs(self.weights) ** (lebesgue_norm - 1)
-                tot_input=torch.mm(W, mini_batch)
+                W = (sign * torch.abs(self.weights) ** (lebesgue_norm - 1)).to(self.device)
+                tot_input = torch.mm(W, mini_batch)
 
-                y = torch.argsort(tot_input, dim=0)
+                y = torch.argsort(tot_input, dim=0).to(self.device)
                 yl = torch.zeros((self.output_size, batch_size), dtype = torch.float).to(self.device)
                 yl[y[self.output_size - 1,:], torch.arange(batch_size)] = 1.0
                 yl[y[self.output_size - rank], torch.arange(batch_size)] =- anti_hebbian_learning_strength
