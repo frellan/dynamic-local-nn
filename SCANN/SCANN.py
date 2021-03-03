@@ -41,7 +41,7 @@ class SCANN(nn.Module):
 
             batch = 1
             for mini_batch, _ in train_loader:
-                mini_batch = torch.transpose(mini_batch, 0, 1)
+                mini_batch = torch.transpose(mini_batch, 0, 1).to(self.device)
                 sign = torch.sign(self.weights)
                 W = (sign * torch.abs(self.weights) ** (lebesgue_norm - 1)).to(self.device)
                 tot_input = torch.mm(W, mini_batch)
