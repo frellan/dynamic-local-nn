@@ -2,11 +2,12 @@ import torch
 import torch.nn as nn
 
 class HebbianLayer(nn.Module):
-    def __init__(self, in_features, out_features, learning_rate):
+    def __init__(self, in_features, out_features, learning_rate, device):
         super(HebbianLayer, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.weights = torch.rand(out_features, in_features)
+        self.device = device
+        self.weights = torch.rand(out_features, in_features).to(self.device)
 
         self.batch_size = learning_rate
         self.learning_rate = learning_rate
@@ -29,13 +30,13 @@ class HebbianLayer(nn.Module):
         rank = 2
         batch_size = input.shape[0]
 
-        mini_batch = torch.transpose(input, 0, 1)
+        mini_batch = torch.transpose(input, 0, 1).to(self.device)
         sign = torch.sign(self.weights)
         W = sign * torch.abs(self.weights) ** (lebesgue_norm - 1)
         tot_input = torch.mm(W, mini_batch)
 
         y = torch.argsort(tot_input, dim=0)
-        yl = torch.zeros((self.out_features, batch_size), dtype = torch.float)
+        yl = torch.zeros((self.out_features, batch_size), dtype = torch.float).to(self.device)
         yl[y[self.out_features - 1,:], torch.arange(batch_size)] = 1.0
         yl[y[self.out_features - rank], torch.arange(batch_size)] =- anti_hebbian_learning_strength
 
