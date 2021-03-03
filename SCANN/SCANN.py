@@ -65,8 +65,8 @@ class SCANN(nn.Module):
     def run_test(self, train_dl, test_dl, epochs, lr=1e-3, verbose=0):
         start = time()
 
-        model = BioClassifier(self.weights, 10)
-        loss = BioLoss(10)
+        model = BioClassifier(self.weights, 10).to(self.device)
+        loss = BioLoss(10, self.device)
         optimizer = optim.Adam(model.parameters(), lr=lr)
         trainer = create_supervised_trainer(model, optimizer, loss, device=self.device)
         evaluator = create_supervised_evaluator(model, metrics={'accuracy': Accuracy(), 'loss': Loss(loss)}, device=self.device)
