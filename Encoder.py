@@ -3,11 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Encoder(nn.Module):
-    def __init__(self, learning_rate=2e-2):
+    def __init__(self, device, learning_rate=2e-2):
         super().__init__()
+        self.device = device
         self.learning_rate = learning_rate
-        self.hebb1 = HebbianLayer(784, 256, learning_rate)
-        self.hebb2 = HebbianLayer(256, 128, learning_rate)
+        self.hebb1 = HebbianLayer(784, 256, learning_rate, self.device)
+        self.hebb2 = HebbianLayer(256, 128, learning_rate, self.device)
         self.training = True
 
     def forward(self, x):
